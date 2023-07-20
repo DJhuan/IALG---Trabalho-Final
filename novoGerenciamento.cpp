@@ -24,11 +24,10 @@ void imprimirMenu();
 void imprimirDados(dadosPrato *v, int tam);
 dadosPrato *lerDados(string nome_arq, int &tam);
 bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq);
-void shell_sort(dadosPrato *v, int tam);
+void shell_sort(string nome_arq);
 dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp);
-int encontrar_indice(dadosPrato *vet, int tam, int indiceUsuario);
 
-int main(int argc, char **argv){
+int main(){
 
     cout << "*********************************\n";
     cout << "*********** Bem-Vindo ***********\n";
@@ -69,6 +68,7 @@ int main(int argc, char **argv){
                 imprimirMenu();
                 break;
             case 'i':
+                shell_sort("baseDados.dat");
                 break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
@@ -85,23 +85,12 @@ int main(int argc, char **argv){
     return 0;
 }
 
-int encontrar_indice(dadosPrato *vet, int tam, int indiceUsuario){
-    int k = 0, i = 0;
-    while (k != indiceUsuario){
-        if (!vet[i].apagado){
-            k++;
-        }
-        i++;
-    }
-
-    return i;
-}
-
-void shell_sort(dadosPrato *v, int tam, string nome_arquivo){
-    
+void shell_sort(string nome_arquivo){
+    int tam;
+    dadosPrato *v =  lerDados(nome_arquivo, tam);
 
     int ciura[7] = {1,4,10,23,57,132,301};
-    int i_gap = 7;
+    int i_gap = 6;
     
     while (ciura[i_gap] > tam){
         i_gap--;
@@ -125,6 +114,8 @@ void shell_sort(dadosPrato *v, int tam, string nome_arquivo){
         }
         i_gap--;
     }
+
+    imprimirDados(v, tam);
 }
 
 dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp){
@@ -181,12 +172,15 @@ void imprimirDados(dadosPrato *v, int tam){
         }
         i++;
     }
+
+    imprimirDados(v, tam);
 }
 
 bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq){
     ofstream saida(nomeArq);
     
     saida.write((char *) vetor, sizeof(dadosPrato)*tam);
+
 
     return true;
 }
