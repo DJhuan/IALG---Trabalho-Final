@@ -20,7 +20,7 @@ struct dadosPrato{
 };
 
 int main(int argc, char **argv){
-    ifstream a("baseDados.csv");
+    ifstream a("baseU.csv");
 
     string unused;
     int tam = 0;
@@ -31,7 +31,7 @@ int main(int argc, char **argv){
 
     dadosPrato *v = new dadosPrato[tam];
 
-    ifstream entrada("baseDados.csv");
+    ifstream entrada("baseU.csv");
 
     int i = 0;
     string buffer;
@@ -49,12 +49,15 @@ int main(int argc, char **argv){
         strcpy(v[i].selo, buffer.c_str());
         entrada >> v[i].apagado;
         entrada.ignore();
+        entrada.ignore();
 
         i++;
     }
     entrada.close();
     ofstream saida("baseDados.dat", ios::binary);
-
+    for (int i=0; i < tam; i++){
+        cout << v[i].nome << endl;
+    }
     saida.write((char *) v, sizeof(dadosPrato)*tam);
     saida.close();
     return 0;

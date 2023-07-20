@@ -1,2 +1,8 @@
-/.vscode
-/CheckPoint
+/.vscode/
+/CheckPoint/
+baseU.csv
+baseDados.dat
+conversaodedados
+conversaodedados.cpp
+conversaodedados.exe
+gerenciamentoDePratosV1.5.cpp

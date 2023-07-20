@@ -115,7 +115,10 @@ void shell_sort(string nome_arquivo){
         i_gap--;
     }
 
-    imprimirDados(v, tam);
+    ofstream saida(nome_arquivo, ios::binary);
+    saida.write((char *) v, sizeof(dadosPrato[tam]));
+
+    delete [] v;
 }
 
 dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp){
@@ -157,7 +160,7 @@ void imprimirDados(dadosPrato *v, int tam){
             setw(20) << "Chefe" << 
             setw(10) << "Avaliacao" << 
             setw(8) << "Preco" <<
-            setw(13) << "Selo\n";
+            setw(13) << "Selo" << endl;
     int i = 0, indice = 1;
 
     while (i <= limSuperior){
@@ -167,13 +170,11 @@ void imprimirDados(dadosPrato *v, int tam){
                     setw(20) << v[i].chefe << 
                     setw(10) << v[i].avaliacao << 
                     setw(8) << v[i].preco << 
-                    setw(12) << v[i].selo << endl; 
+                    setw(12) << v[i].selo << endl;
             indice++;
         }
         i++;
     }
-
-    imprimirDados(v, tam);
 }
 
 bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq){
