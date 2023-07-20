@@ -1,0 +1,4 @@
+Risoto de cogumelos,Gustavo Oliveira,8,55.50,Vegetariano,0
+Salmao grelhado empanado,Isabela Costa,9,20.00,Comum,0
+123,123,7,8.00,Comum,0
+File mignon ao madere,Carlos Silva,8,88.75,Comum,0
