@@ -27,7 +27,7 @@ int main(int argc, char **argv){
     while (getline(a, unused) )
         ++tam;
     a.close();
-    cout << "O arquivo contem um total de "<< tam << " linhas\n\n.";
+    cout << "O arquivo contem um total de "<< tam << " linhas.\n\n";
 
     dadosPrato *v = new dadosPrato[tam];
 

@@ -20,12 +20,41 @@ struct dadosPrato{
     bool apagado;
 };
 
-void imprimirMenu();
-void imprimirDados(string nome_arq);
-dadosPrato *lerDados(string nome_arq, int &tam);
-bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq);
+void imprimir_menu();
+void imprimir_dados(string nome_arq);
+dadosPrato *ler_dados(string nome_arq, int &tam);
+bool armazenar_dados(dadosPrato *vetor, int tam, string nomeArq);
 void shell_sort(string nome_arq);
-dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp);
+dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp);
+
+void organizar_apagados(string nome_arq, int indice=-1){
+    int tam;
+    dadosPrato *v = ler_dados(nome_arq, tam);
+
+    int i_itensApagados = tam - 1;
+
+    while (v[i_itensApagados].apagado){
+        i_itensApagados--;
+    }
+
+    if (indice == -1){
+        for (int j=0; j < tam and j < i_itensApagados; j++){
+            if (v[j].apagado){
+                swap(v[j], v[i_itensApagados]);
+                i_itensApagados--;
+            }
+        }
+    } else {
+        indice -= 1; // Subtraindo para que o índice em tela corresponda ao do vetor
+        swap(v[indice], v[i_itensApagados]);
+    }
+    
+    ofstream saida(nome_arq, ios::binary);
+    saida.write((char *) v, sizeof(dadosPrato[tam]));
+    saida.close();
+
+    delete [] v;
+}
 
 int main(){
 
@@ -36,7 +65,7 @@ int main(){
     cout << "*********************************\n\n";
 
     // Impressao do menu
-    imprimirMenu();
+    imprimir_menu();
 
     // Loop principal - Leitura dos comandos
     bool caracterValido = false;
@@ -59,18 +88,17 @@ int main(){
                 //edicao(pratos, qntPratos);
                 break;
             case '5':
-                imprimirDados(NOME_ARQUIVO);
+                imprimir_dados(NOME_ARQUIVO);
                 break;
             case 'E':
             case 'e':
-                    caracterValido = true;//sequenciaSaida(pratos, qntPratos, nomeBaseDeDados);
+                caracterValido = true;
                 break;
             case 'm':
             case 'M':
-                imprimirMenu();
+                imprimir_menu();
                 break;
             case 'i':
-                shell_sort(NOME_ARQUIVO);
                 break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
@@ -82,17 +110,18 @@ int main(){
     cout << "************* Adeus *************\n";
     cout << "*********************************\n\n";
 
-    //bool status_armazenamento = armazenarDados(pratos, qnt_pratos, arquivo);
+    //bool status_armazenamento = armazenar_dados(pratos, qnt_pratos, arquivo);
 
     return 0;
 }
 
 void shell_sort(string nome_arquivo){
     int tam;
-    dadosPrato *v =  lerDados(nome_arquivo, tam);
+    dadosPrato *v =  ler_dados(nome_arquivo, tam);
 
     int ciura[7] = {1,4,10,23,57,132,301};
     int i_gap = 6;
+    int i_alocacaoApagado; // Índice reservado para dados apagados
     
     while (ciura[i_gap] > tam){
         i_gap--;
@@ -118,12 +147,13 @@ void shell_sort(string nome_arquivo){
     }
 
     ofstream saida(nome_arquivo, ios::binary);
+    saida.seekp(0, ios::beg);
     saida.write((char *) v, sizeof(dadosPrato[tam]));
-
+    saida.close();
     delete [] v;
 }
 
-dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp){
+dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp){
     dadosPrato *newV = new dadosPrato[tam + exp];
 
     copy(v, v + tam, newV);
@@ -135,7 +165,7 @@ dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp){
     return v;
 }
 
-dadosPrato *lerDados(string nome_arq, int &tam){
+dadosPrato *ler_dados(string nome_arq, int &tam){
     // Descobre o tamanho do arquivo e a quantidade de linhas
     ifstream entrada(nome_arq, ios::binary | ios::ate);
 
@@ -154,7 +184,7 @@ dadosPrato *lerDados(string nome_arq, int &tam){
     return v;
 }
 
-void imprimirDados(string nome_arq){
+void imprimir_dados(string nome_arq){
     cout << setfill(' ');
     cout << "\nIndice" << 
     setw(30) << "Prato" <<
@@ -187,7 +217,7 @@ void imprimirDados(string nome_arq){
     }
 }
 
-bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq){
+bool armazenar_dados(dadosPrato *vetor, int tam, string nomeArq){
     ofstream saida(nomeArq);
     
     saida.write((char *) vetor, sizeof(dadosPrato)*tam);
@@ -195,7 +225,7 @@ bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq){
     return true;
 }
 
-void imprimirMenu(){
+void imprimir_menu(){
     cout << "Escolha uma opcao para comecar" << endl;
     cout << "1 - Buscar um item\n"
             "2 - Inserir um item\n"
