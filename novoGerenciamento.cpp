@@ -21,13 +21,15 @@ struct dadosPrato{
 };
 
 void imprimirMenu();
-void imprimirDados(dadosPrato *v, int tam);
+void imprimirDados(string nome_arq);
 dadosPrato *lerDados(string nome_arq, int &tam);
 bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq);
 void shell_sort(string nome_arq);
 dadosPrato *expandirVetor(dadosPrato *v, int &tam, int exp);
 
 int main(){
+
+    const string NOME_ARQUIVO = "baseDados.dat";
 
     cout << "*********************************\n";
     cout << "*********** Bem-Vindo ***********\n";
@@ -57,7 +59,7 @@ int main(){
                 //edicao(pratos, qntPratos);
                 break;
             case '5':
-                //imprimirDados(pratos, qnt_pratos);
+                imprimirDados(NOME_ARQUIVO);
                 break;
             case 'E':
             case 'e':
@@ -68,7 +70,7 @@ int main(){
                 imprimirMenu();
                 break;
             case 'i':
-                shell_sort("baseDados.dat");
+                shell_sort(NOME_ARQUIVO);
                 break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
@@ -152,28 +154,36 @@ dadosPrato *lerDados(string nome_arq, int &tam){
     return v;
 }
 
-void imprimirDados(dadosPrato *v, int tam){
-    int limSuperior = tam - 1;
-    cout << setfill(' '); 
+void imprimirDados(string nome_arq){
+    cout << setfill(' ');
     cout << "\nIndice" << 
-            setw(30) << "Prato" <<
-            setw(20) << "Chefe" << 
-            setw(10) << "Avaliacao" << 
-            setw(8) << "Preco" <<
-            setw(13) << "Selo" << endl;
-    int i = 0, indice = 1;
+    setw(30) << "Prato" <<
+    setw(20) << "Chefe" << 
+    setw(10) << "Avaliacao" << 
+    setw(8) << "Preco" <<
+    setw(13) << "Selo" << endl;
 
-    while (i <= limSuperior){
-        if (!v[i].apagado){
+    ifstream entrada(nome_arq, ios::binary | ios::ate);
+    int linhas = entrada.tellg();
+    linhas = linhas / sizeof(dadosPrato);
+
+    dadosPrato *buffer = new dadosPrato;
+    int indice = 1;
+
+    entrada.seekg(0, ios::beg);
+
+    while (linhas >= 1){
+        entrada.read((char *) buffer, sizeof(dadosPrato));
+        if (!(buffer->apagado)){
             cout << setw(6) << indice <<
-                    setw(30) << v[i].nome << 
-                    setw(20) << v[i].chefe << 
-                    setw(10) << v[i].avaliacao << 
-                    setw(8) << v[i].preco << 
-                    setw(12) << v[i].selo << endl;
+                    setw(30) << buffer->nome<< 
+                    setw(20) << buffer->chefe << 
+                    setw(10) << buffer->avaliacao << 
+                    setw(8) << buffer->preco << 
+                    setw(12) << buffer->selo << endl;
             indice++;
         }
-        i++;
+        linhas--;
     }
 }
 
@@ -181,7 +191,6 @@ bool armazenarDados(dadosPrato *vetor, int tam, string nomeArq){
     ofstream saida(nomeArq);
     
     saida.write((char *) vetor, sizeof(dadosPrato)*tam);
-
 
     return true;
 }
