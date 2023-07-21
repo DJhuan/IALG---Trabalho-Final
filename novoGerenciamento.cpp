@@ -23,38 +23,10 @@ struct dadosPrato{
 void imprimir_menu();
 void imprimir_dados(string nome_arq);
 dadosPrato *ler_dados(string nome_arq, int &tam);
-bool armazenar_dados(dadosPrato *vetor, int tam, string nomeArq);
 void shell_sort(string nome_arq);
 dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp);
 
-void organizar_apagados(string nome_arq, int indice=-1){
-    int tam;
-    dadosPrato *v = ler_dados(nome_arq, tam);
-
-    int i_itensApagados = tam - 1;
-
-    while (v[i_itensApagados].apagado){
-        i_itensApagados--;
-    }
-
-    if (indice == -1){
-        for (int j=0; j < tam and j < i_itensApagados; j++){
-            if (v[j].apagado){
-                swap(v[j], v[i_itensApagados]);
-                i_itensApagados--;
-            }
-        }
-    } else {
-        indice -= 1; // Subtraindo para que o índice em tela corresponda ao do vetor
-        swap(v[indice], v[i_itensApagados]);
-    }
-    
-    ofstream saida(nome_arq, ios::binary);
-    saida.write((char *) v, sizeof(dadosPrato[tam]));
-    saida.close();
-
-    delete [] v;
-}
+void organizar_apagados(string nome_arq, int indice);
 
 int main(){
 
@@ -99,6 +71,7 @@ int main(){
                 imprimir_menu();
                 break;
             case 'i':
+                shell_sort(NOME_ARQUIVO);
                 break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
@@ -121,7 +94,11 @@ void shell_sort(string nome_arquivo){
 
     int ciura[7] = {1,4,10,23,57,132,301};
     int i_gap = 6;
-    int i_alocacaoApagado; // Índice reservado para dados apagados
+    int i_itensApagados = tam - 1;
+
+    while (v[i_itensApagados].apagado){
+        i_itensApagados--;
+    }
     
     while (ciura[i_gap] > tam){
         i_gap--;
@@ -132,7 +109,7 @@ void shell_sort(string nome_arquivo){
 
     while (i_gap >= 0){
         gap  = ciura[i_gap];
-        for (int i=gap; i < tam; i++){
+        for (int i=gap; i <= i_itensApagados; i++){
             pivo = v[i];
             j = i;
 
@@ -185,45 +162,93 @@ dadosPrato *ler_dados(string nome_arq, int &tam){
 }
 
 void imprimir_dados(string nome_arq){
-    cout << setfill(' ');
-    cout << "\nIndice" << 
-    setw(30) << "Prato" <<
-    setw(20) << "Chefe" << 
-    setw(10) << "Avaliacao" << 
-    setw(8) << "Preco" <<
-    setw(13) << "Selo" << endl;
 
+    // Abertura e busca do tamanho do arquivo;
     ifstream entrada(nome_arq, ios::binary | ios::ate);
-    int linhas = entrada.tellg();
-    linhas = linhas / sizeof(dadosPrato);
+    const int linhas = entrada.tellg() / sizeof(dadosPrato);
 
     dadosPrato *buffer = new dadosPrato;
-    int indice = 1;
+    int pos_cursor = entrada.tellg();
+    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
+    entrada.read((char *) buffer, sizeof(dadosPrato));
+    int i_itensApagados = linhas - 1;
 
-    entrada.seekg(0, ios::beg);
+    while (buffer->apagado){
+        i_itensApagados--;
+        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
+        entrada.read((char *) buffer, sizeof(dadosPrato));
+    }
+    entrada.seekg(0);
 
-    while (linhas >= 1){
+    cout << "Escolha uma faixa de impressão (Ex.: 9 17): ";
+    int limSup, limInf;
+    cin >> limInf >> limSup;
+
+    bool indices_validos = false;
+        while (!indices_validos){
+        if ((limInf + limSup) == 0){
+            limInf = 0;
+            limSup = linhas;
+            indices_validos = true;
+        } else if ((limInf <= limSup) and (limInf-1 >= 0) and (limSup-1 <= i_itensApagados)){
+            limInf--;
+            limSup--;
+            indices_validos = true;
+        } else {
+            cout << "Limites inválidos!!\n";
+            cout << "Escolha novos limites: ";
+            cin >> limInf >> limSup;
+        }
+    }
+
+    // Impressao do cabeçalho
+    cout << setfill(' ');
+    cout << "\nIndice" << setw(30) << "Prato" << setw(20) << "Chefe" << 
+    setw(10) << "Avaliacao" << setw(8) << "Preco" << setw(13) << "Selo" << endl;
+
+    entrada.seekg(limInf * sizeof(dadosPrato), ios::beg);
+
+    int indice = limInf + 1;
+    while (limSup >= limInf){
         entrada.read((char *) buffer, sizeof(dadosPrato));
         if (!(buffer->apagado)){
-            cout << setw(6) << indice <<
-                    setw(30) << buffer->nome<< 
-                    setw(20) << buffer->chefe << 
-                    setw(10) << buffer->avaliacao << 
-                    setw(8) << buffer->preco << 
-                    setw(12) << buffer->selo << endl;
+            cout << setw(6) << indice << setw(30) << buffer->nome<< setw(20) << buffer->chefe << 
+            setw(10) << buffer->avaliacao << setw(8) << buffer->preco << setw(12) << buffer->selo << endl;
             indice++;
         }
-        linhas--;
+        limSup--;
     }
 }
 
-bool armazenar_dados(dadosPrato *vetor, int tam, string nomeArq){
-    ofstream saida(nomeArq);
-    
-    saida.write((char *) vetor, sizeof(dadosPrato)*tam);
+void organizar_apagados(string nome_arq, int indice=-1){
+    int tam;
+    dadosPrato *v = ler_dados(nome_arq, tam);
 
-    return true;
+    int i_itensApagados = tam - 1;
+
+    while (v[i_itensApagados].apagado){
+        i_itensApagados--;
+    }
+
+    if (indice == -1){
+        for (int j=0; j < tam and j < i_itensApagados; j++){
+            if (v[j].apagado){
+                swap(v[j], v[i_itensApagados]);
+                i_itensApagados--;
+            }
+        }
+    } else {
+        indice -= 1; // Subtraindo para que o índice em tela corresponda ao do vetor
+        swap(v[indice], v[i_itensApagados]);
+    }
+    
+    ofstream saida(nome_arq, ios::binary);
+    saida.write((char *) v, sizeof(dadosPrato[tam]));
+    saida.close();
+
+    delete [] v;
 }
+
 
 void imprimir_menu(){
     cout << "Escolha uma opcao para comecar" << endl;
