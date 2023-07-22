@@ -25,8 +25,9 @@ void imprimir_dados(string nome_arq);
 dadosPrato *ler_dados(string nome_arq, int &tam);
 void shell_sort(string nome_arq);
 dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp);
-
 void organizar_apagados(string nome_arq, int indice);
+int seletor_de_filtro(string &filtroSelo);
+bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo);
 
 int main(){
 
@@ -88,21 +89,91 @@ int main(){
     return 0;
 }
 
+int seletor_de_filtro(string &filtroSelo){
+    cout << "\nPreferencia de ordenacao: \n";
+    cout << "Voce deseja ordenar por: \n[1] - Avaliacao\n[2] - Preco\n[3] - Selo";
+    int filtroAtributo = 0;
+    filtroSelo = "NADA";
+
+    while (filtroAtributo < 1 or filtroAtributo > 3){
+        cout << "\nSelecione: ";
+        cin >> filtroAtributo;
+
+        if (filtroAtributo < 1 or filtroAtributo > 3){
+            cout << "!! Escolha Inválida !!\n";
+        } else if (filtroAtributo == 3){
+            int opcao = -1;
+            cout << "Escolha o selo: \n[1] - Vegano\n[2] - Vegetariano\n[3] - Comum";
+            while (opcao < 1 or opcao > 3){
+                cout << "\nSelecione: ";
+                cin >> opcao;
+                if (opcao == 1){
+                    filtroSelo = "Vegano";
+                } else if (opcao == 2){
+                    filtroSelo = "Vegetariano";
+                } else if (opcao == 3){
+                    filtroSelo = "Comum";
+                } else {
+                    cout << "!! Escolha Inválida !!\n";
+                }
+            }
+        }
+    }
+    return filtroAtributo;
+}
+
+bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo=0){
+    /* 
+    Retorno: True - itemA >= itemB
+             False - itemB > itemA
+    Comparações (tipo): 0-Avaliacao; 1-Preço; 2-Selo
+    */
+
+    switch (tipo){
+        case 1:
+            if (itemA.avaliacao >= itemB.avaliacao)
+                return true;
+            else
+                return false;
+            break;
+        case 2:
+            if (itemA.preco >= itemB.preco)
+                return true;
+            else
+                return false;
+            break;
+        case 3:
+            if (itemA.selo == filtroSelo)
+                return true;
+            else
+                return false;
+            break;
+        default:
+                return false;
+            break;
+    }
+}
+
 void shell_sort(string nome_arquivo){
+    
+    string filtroSelo;
+    int filtroAtributo = seletor_de_filtro(filtroSelo);
+
     int tam;
     dadosPrato *v =  ler_dados(nome_arquivo, tam);
 
     int ciura[7] = {1,4,10,23,57,132,301};
     int i_gap = 6;
-    int i_itensApagados = tam - 1;
+    while (ciura[i_gap] > tam){
+        i_gap--;
+    }
 
+    // Encontra a divisão onde os itens apagados estão armazenados
+    int i_itensApagados = tam - 1;
     while (v[i_itensApagados].apagado){
         i_itensApagados--;
     }
     
-    while (ciura[i_gap] > tam){
-        i_gap--;
-    }
 
     int gap, j;
     dadosPrato pivo;
@@ -113,7 +184,7 @@ void shell_sort(string nome_arquivo){
             pivo = v[i];
             j = i;
 
-            while (j >= gap and v[j-gap].avaliacao < pivo.avaliacao){
+            while (j >= gap and comparador(pivo, v[j-gap], filtroSelo, filtroAtributo)){
                 v[j] = v[j-gap];
                 j -= gap;
             }
@@ -128,6 +199,8 @@ void shell_sort(string nome_arquivo){
     saida.write((char *) v, sizeof(dadosPrato[tam]));
     saida.close();
     delete [] v;
+
+    cout << "\n*** ORDENACAO CONCLUIDA ***\n\n";
 }
 
 dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp){
@@ -248,7 +321,6 @@ void organizar_apagados(string nome_arq, int indice=-1){
 
     delete [] v;
 }
-
 
 void imprimir_menu(){
     cout << "Escolha uma opcao para comecar" << endl;

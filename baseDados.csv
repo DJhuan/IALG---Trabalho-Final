@@ -55,8 +55,8 @@ Salada de beterraba,Ana Torres,7,20.35,Vegano,0
 Paella valenciana,Ricardo Oliveira,9,90.00,Comum,0
 Salada de couve-flor,Mariana Almeida,5,25.50,Vegetariano,0
 Bobo de frango,Rafaela Castro,8,32.50,Comum,0
-Salada de abacaxi com hortela,Laura Almeida,7,28.26,Vegano,1
-Feijao preto,Carlos Lima,7,28.90,Comum,1
+Salada de abacaxi com hortela,Laura Almeida,7,28.26,Vegano,0
+Feijao preto,Carlos Lima,7,28.90,Comum,0
 Salada de repolho roxo,Gustavo Torres,6,22.29,Vegetariano,0
 Bife a milanesa,Joao Fernandes,7,38.59,Comum,0
 Salada de grao de bico,Laura Almeida,8,23.19,Vegano,0
@@ -84,7 +84,7 @@ Salada de alface com tomate,Fernanda Lima,9,12.50,Vegano,0
 Carne louca,Sofia Carvalho,4,45.05,Comum,0
 Abobora com grao de bico,Thiago Nakamura,7,25.70,Vegetariano,0
 Sanduiche de pernil,Eduardo Costa,9,32.90,Comum,0
-Salada de lentilha e hortela,Ana Barbosa,8,28.50,Vegano,1
+Salada de lentilha e hortela,Ana Barbosa,8,28.50,Vegano,0
 Espetinho de carne,Andreia Mendonca,7,18.00,Comum,0
 Brie gratinado,Rafaela Almeida,4,45.50,Vegetariano,0
 Sopa de feijao,Lucas Oliveira,8,20.00,Vegano,0
@@ -93,8 +93,8 @@ Assado de abobrinha,Fernanda Oliveira,9,25.09,Vegano,0
 Salada de folhas,Carolina Torres,8,35.90,Vegetariano,0
 Churrasco misto,Andre Santos,7,62.95,Comum,0
 Salada de abacaxi com coco,Rafaela Almeida,10,28.18,Vegano,0
-Espetinho de frango,Gustavo Torres,8,18.50,Comum,0
-Fettucine e rucula,Laura Alves,5,22.55,Vegetariano,0
-Bacalhau ao forno,Bruno Rodrigues,6,68.40,Comum,0
-Salada de berinjela,Carla Oliveira,8,35.22,Vegetariano,0
+Espetinho de frango,Gustavo Torres,8,18.50,Comum,1
+Fettucine e rucula,Laura Alves,5,22.55,Vegetariano,1
+Bacalhau ao forno,Bruno Rodrigues,6,68.40,Comum,1
+Salada de berinjela,Carla Oliveira,8,35.22,Vegetariano,1
 Arroz a piamontese,Eduardo Oliveira,7,32.80,Comum,1
