@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cstring>
 
 #define TAM_PRATO 30
 #define TAM_CHEFE 20
@@ -28,6 +29,60 @@ dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp);
 void organizar_apagados(string nome_arq, int indice);
 int seletor_de_filtro(string &filtroSelo);
 bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo);
+void insercao(string nome_arq){
+    ifstream entrada(nome_arq, ios::binary | ios::ate);
+    const int linhas = entrada.tellg() / sizeof(dadosPrato);
+
+    dadosPrato *buffer = new dadosPrato;
+    int pos_cursor = entrada.tellg();
+    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
+    entrada.read((char *) buffer, sizeof(dadosPrato));
+    int i_itensApagados = linhas - 1;
+
+    while (buffer->apagado){
+        i_itensApagados--;
+        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
+        entrada.read((char *) buffer, sizeof(dadosPrato));
+    }
+    entrada.close();
+    
+    fstream saida(nome_arq, ios::binary | ios::in | ios::ate | ios::out);
+    saida.seekp(i_itensApagados+1 * sizeof(dadosPrato), ios::beg);
+
+    dadosPrato *novoItem = new dadosPrato;
+    cout << "Entre com as informações do novo prato: \nNome: ";
+    cin.ignore();
+    cin.getline(novoItem->nome, sizeof(novoItem->nome));
+    cout << "Chefe: ";
+    cin.getline(novoItem->chefe, sizeof(novoItem->chefe));
+    do {
+        cout << "Avaliacao (0 até 10): ";
+        cin >> novoItem->avaliacao;
+    } while (novoItem->avaliacao < 0 or novoItem->avaliacao > 10);
+    cout << "Preco: ";
+    cin >> novoItem->preco;
+    cin.ignore();
+
+    cout << "Selo\n[1] - Vegano\n[2] - Vegetariano\n[3] - Comum\n";
+    int escolha = -1;
+    while (escolha < 1 or escolha > 3){
+        cin >> escolha;
+        if (escolha < 1 or escolha > 3)
+            cout << "Entrada invalida!\nEscolha novamente: ";
+    }
+    if (escolha == 1)
+        strncpy(novoItem->selo, "Vegano", sizeof(char[12]));
+    else if (escolha == 2)
+        strncpy(novoItem->selo, "Vegetariano", sizeof(char[12]));
+    else
+        strncpy(novoItem->selo, "Comum", sizeof(char[12]));
+
+    novoItem->apagado = false;
+
+    saida.seekp(((i_itensApagados+1) * sizeof(dadosPrato)), ios::beg);
+    saida.write((char *) novoItem, sizeof(dadosPrato));
+    saida.close();
+}
 
 int main(){
 
@@ -52,7 +107,7 @@ int main(){
                 //busca(pratos, qntPratos);
                 break;
             case '2':
-                //pratos = insercao(pratos, qntPratos, nomeBaseDeDados);
+                insercao(NOME_ARQUIVO);
                 break;
             case '3':
                 //remocao(pratos, qntPratos);
