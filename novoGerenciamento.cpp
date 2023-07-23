@@ -26,63 +26,10 @@ void imprimir_dados(string nome_arq);
 dadosPrato *ler_dados(string nome_arq, int &tam);
 void shell_sort(string nome_arq);
 dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp);
-void organizar_apagados(string nome_arq, int indice);
+void organizar_apagados(string nome_arq, int indice=-1);
 int seletor_de_filtro(string &filtroSelo);
 bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo);
-void insercao(string nome_arq){
-    ifstream entrada(nome_arq, ios::binary | ios::ate);
-    const int linhas = entrada.tellg() / sizeof(dadosPrato);
-
-    dadosPrato *buffer = new dadosPrato;
-    int pos_cursor = entrada.tellg();
-    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
-    entrada.read((char *) buffer, sizeof(dadosPrato));
-    int i_itensApagados = linhas - 1;
-
-    while (buffer->apagado){
-        i_itensApagados--;
-        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
-        entrada.read((char *) buffer, sizeof(dadosPrato));
-    }
-    entrada.close();
-    
-    fstream saida(nome_arq, ios::binary | ios::in | ios::ate | ios::out);
-    saida.seekp(i_itensApagados+1 * sizeof(dadosPrato), ios::beg);
-
-    dadosPrato *novoItem = new dadosPrato;
-    cout << "Entre com as informações do novo prato: \nNome: ";
-    cin.ignore();
-    cin.getline(novoItem->nome, sizeof(novoItem->nome));
-    cout << "Chefe: ";
-    cin.getline(novoItem->chefe, sizeof(novoItem->chefe));
-    do {
-        cout << "Avaliacao (0 até 10): ";
-        cin >> novoItem->avaliacao;
-    } while (novoItem->avaliacao < 0 or novoItem->avaliacao > 10);
-    cout << "Preco: ";
-    cin >> novoItem->preco;
-    cin.ignore();
-
-    cout << "Selo\n[1] - Vegano\n[2] - Vegetariano\n[3] - Comum\n";
-    int escolha = -1;
-    while (escolha < 1 or escolha > 3){
-        cin >> escolha;
-        if (escolha < 1 or escolha > 3)
-            cout << "Entrada invalida!\nEscolha novamente: ";
-    }
-    if (escolha == 1)
-        strncpy(novoItem->selo, "Vegano", sizeof(char[12]));
-    else if (escolha == 2)
-        strncpy(novoItem->selo, "Vegetariano", sizeof(char[12]));
-    else
-        strncpy(novoItem->selo, "Comum", sizeof(char[12]));
-
-    novoItem->apagado = false;
-
-    saida.seekp(((i_itensApagados+1) * sizeof(dadosPrato)), ios::beg);
-    saida.write((char *) novoItem, sizeof(dadosPrato));
-    saida.close();
-}
+void insercao(string nome_arq);
 
 int main(){
 
@@ -127,7 +74,7 @@ int main(){
                 imprimir_menu();
                 break;
             case 'i':
-                shell_sort(NOME_ARQUIVO);
+                organizar_apagados(NOME_ARQUIVO);
                 break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
@@ -142,6 +89,61 @@ int main(){
     //bool status_armazenamento = armazenar_dados(pratos, qnt_pratos, arquivo);
 
     return 0;
+}
+
+void insercao(string nome_arq){
+    ifstream entrada(nome_arq, ios::binary | ios::ate);
+    const int linhas = entrada.tellg() / sizeof(dadosPrato);
+
+    dadosPrato *buffer = new dadosPrato;
+    int pos_cursor = entrada.tellg();
+    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
+    entrada.read((char *) buffer, sizeof(dadosPrato));
+    int i_itensApagados = linhas - 1;
+
+    while (buffer->apagado){
+        i_itensApagados--;
+        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
+        entrada.read((char *) buffer, sizeof(dadosPrato));
+    }
+    entrada.close();
+    
+    fstream saida(nome_arq, ios::binary | ios::in | ios::ate | ios::out);
+    saida.seekp(i_itensApagados+1 * sizeof(dadosPrato), ios::beg);
+
+    dadosPrato *novoItem = new dadosPrato;
+    cout << "Entre com as informações do novo prato: \nNome: ";
+    cin.ignore();
+    cin.getline(novoItem->nome, sizeof(novoItem->nome));
+    cout << "Chefe: ";
+    cin.getline(novoItem->chefe, sizeof(novoItem->chefe));
+    do {
+        cout << "Avaliacao (0 até 10): ";
+        cin >> novoItem->avaliacao;
+    } while (novoItem->avaliacao < 0 or novoItem->avaliacao > 10);
+    cout << "Preco: ";
+    cin >> novoItem->preco;
+    cin.ignore();
+
+    cout << "Escolha o selo: \n[1] - Vegano\n[2] - Vegetariano\n[3] - Comum\nEscolha: ";
+    int escolha = -1;
+    while (escolha < 1 or escolha > 3){
+        cin >> escolha;
+        if (escolha < 1 or escolha > 3)
+            cout << "Entrada invalida!\nEscolha novamente: ";
+    }
+    if (escolha == 1)
+        strncpy(novoItem->selo, "Vegano", sizeof(char[12]));
+    else if (escolha == 2)
+        strncpy(novoItem->selo, "Vegetariano", sizeof(char[12]));
+    else
+        strncpy(novoItem->selo, "Comum", sizeof(char[12]));
+
+    novoItem->apagado = false;
+
+    saida.seekp(((i_itensApagados+1) * sizeof(dadosPrato)), ios::beg);
+    saida.write((char *) novoItem, sizeof(dadosPrato));
+    saida.close();
 }
 
 int seletor_de_filtro(string &filtroSelo){
@@ -316,7 +318,7 @@ void imprimir_dados(string nome_arq){
         while (!indices_validos){
         if ((limInf + limSup) == 0){
             limInf = 0;
-            limSup = linhas;
+            limSup = linhas-1;
             indices_validos = true;
         } else if ((limInf <= limSup) and (limInf-1 >= 0) and (limSup-1 <= i_itensApagados)){
             limInf--;
@@ -332,7 +334,7 @@ void imprimir_dados(string nome_arq){
     // Impressao do cabeçalho
     cout << setfill(' ');
     cout << "\nIndice" << setw(30) << "Prato" << setw(20) << "Chefe" << 
-    setw(10) << "Avaliacao" << setw(8) << "Preco" << setw(13) << "Selo" << endl;
+    setw(10) << "Avaliacao" << setw(8) << "Preco" << setw(12) << "Selo" << endl;
 
     entrada.seekg(limInf * sizeof(dadosPrato), ios::beg);
 
@@ -348,7 +350,7 @@ void imprimir_dados(string nome_arq){
     }
 }
 
-void organizar_apagados(string nome_arq, int indice=-1){
+void organizar_apagados(string nome_arq, int indice){
     int tam;
     dadosPrato *v = ler_dados(nome_arq, tam);
 
