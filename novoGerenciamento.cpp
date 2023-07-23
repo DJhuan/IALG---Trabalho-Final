@@ -30,6 +30,8 @@ void organizar_apagados(string nome_arq, int indice=-1);
 int seletor_de_filtro(string &filtroSelo);
 bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo);
 void insercao(string nome_arq);
+void remocao(string nome_arq);
+int divisao_apagados(string nome_arq, int &linhas);
 
 int main(){
 
@@ -57,7 +59,7 @@ int main(){
                 insercao(NOME_ARQUIVO);
                 break;
             case '3':
-                //remocao(pratos, qntPratos);
+                remocao(NOME_ARQUIVO);
                 break;
             case '4':
                 //edicao(pratos, qntPratos);
@@ -91,23 +93,57 @@ int main(){
     return 0;
 }
 
-void insercao(string nome_arq){
-    ifstream entrada(nome_arq, ios::binary | ios::ate);
-    const int linhas = entrada.tellg() / sizeof(dadosPrato);
+void remocao(string nome_arq){
+    int linhas, i_itensApagados;
+    i_itensApagados = divisao_apagados(nome_arq, linhas);
 
-    dadosPrato *buffer = new dadosPrato;
-    int pos_cursor = entrada.tellg();
-    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
-    entrada.read((char *) buffer, sizeof(dadosPrato));
-    int i_itensApagados = linhas - 1;
-
-    while (buffer->apagado){
-        i_itensApagados--;
-        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
-        entrada.read((char *) buffer, sizeof(dadosPrato));
-    }
-    entrada.close();
+	cout << "Deseja remover algum dos pratos fornecidos nos dados?" << endl;
+    cout << "Sim / Nao (1 / 2): ";
+    string resposta;
+    bool correto = false;
     
+    while(!correto){
+        cin>> resposta;
+        if(resposta == "2"){
+            cout << endl;
+            correto = true;
+        }
+        else if(resposta == "1"){
+            cout << "Digite o identificador do prato que quer remover: ";
+            int removerID;
+            cin >> removerID;
+            int pos = removerID-1;
+            dadosPrato dados;
+            cout << i_itensApagados << "FLAAAAGQ!!\n";
+            fstream arquivo (nome_arq, ios::in | ios::out | ios::binary | ios::ate);
+            if (pos > i_itensApagados){
+                cout << "! Identificador INVALIDO !\n";
+            } else {
+                arquivo.seekg (pos * sizeof(dadosPrato), ios::beg);
+                arquivo.read((char*) &dados, sizeof(dadosPrato));
+                if (dados.apagado){
+                    //Identificador ja apagado
+                    cout << "! Identificador INVALIDO !\n";
+                } else {
+                    dados.apagado = true;
+                    arquivo.seekp (pos * sizeof(dadosPrato), ios::beg);
+                    arquivo.write((char*) &dados, sizeof(dadosPrato));
+                    correto = true;
+                    arquivo.close();
+                    organizar_apagados(nome_arq, pos+1);
+                    cout << "! ITEM REMOVIDO !\n";
+                }
+            }
+        }
+        else
+            cout << "\nCaracter nao reconhecido!\nTente novamente: ";
+    }
+}
+
+void insercao(string nome_arq){
+    int linhas, i_itensApagados;
+    i_itensApagados = divisao_apagados(nome_arq, linhas);
+
     fstream saida(nome_arq, ios::binary | ios::in | ios::ate | ios::out);
     saida.seekp(i_itensApagados+1 * sizeof(dadosPrato), ios::beg);
 
@@ -293,21 +329,10 @@ dadosPrato *ler_dados(string nome_arq, int &tam){
 
 void imprimir_dados(string nome_arq){
 
-    // Abertura e busca do tamanho do arquivo;
+    int linhas, i_itensApagados;
+    i_itensApagados = divisao_apagados(nome_arq, linhas);
+
     ifstream entrada(nome_arq, ios::binary | ios::ate);
-    const int linhas = entrada.tellg() / sizeof(dadosPrato);
-
-    dadosPrato *buffer = new dadosPrato;
-    int pos_cursor = entrada.tellg();
-    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
-    entrada.read((char *) buffer, sizeof(dadosPrato));
-    int i_itensApagados = linhas - 1;
-
-    while (buffer->apagado){
-        i_itensApagados--;
-        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
-        entrada.read((char *) buffer, sizeof(dadosPrato));
-    }
     entrada.seekg(0);
 
     cout << "Escolha uma faixa de impressão (Ex.: 9 17): ";
@@ -338,6 +363,8 @@ void imprimir_dados(string nome_arq){
 
     entrada.seekg(limInf * sizeof(dadosPrato), ios::beg);
 
+    dadosPrato *buffer = new dadosPrato;
+
     int indice = limInf + 1;
     while (limSup >= limInf){
         entrada.read((char *) buffer, sizeof(dadosPrato));
@@ -348,6 +375,7 @@ void imprimir_dados(string nome_arq){
         }
         limSup--;
     }
+    delete buffer;
 }
 
 void organizar_apagados(string nome_arq, int indice){
@@ -388,4 +416,27 @@ void imprimir_menu(){
             "5 - Exibir valores\n"
             "M - Exibir comandos\n"
             "E - Sair\n";
+}
+
+int divisao_apagados(string nome_arq, int &linhas){
+    // Retorna o maior indice dos itens não apagados e a quantidade total de itens por referencia
+    ifstream entrada(nome_arq, ios::binary | ios::ate);
+    linhas = entrada.tellg() / sizeof(dadosPrato);
+
+    dadosPrato *buffer = new dadosPrato;
+    int pos_cursor = entrada.tellg();
+    entrada.seekg(pos_cursor - (sizeof(dadosPrato)));
+    entrada.read((char *) buffer, sizeof(dadosPrato));
+    int i_itensApagados = linhas - 1;
+
+    while (buffer->apagado){
+        i_itensApagados--;
+        entrada.seekg(pos_cursor -= 2*sizeof(dadosPrato));
+        entrada.read((char *) buffer, sizeof(dadosPrato));
+    }
+    entrada.close();
+
+    delete buffer;
+
+    return i_itensApagados;
 }
