@@ -7,16 +7,11 @@
 #include <cstring>
 #include <cmath>
 
-
-#define TAM_PRATO 30
-#define TAM_CHEFE 20
-#define TAM_LINES 100
-
 using namespace std;
 
 struct dadosPrato{
-    char nome[TAM_PRATO];
-    char chefe[TAM_CHEFE];
+    char nome[30];
+    char chefe[20];
     int avaliacao;
     float preco;
     char selo[12];
@@ -79,6 +74,10 @@ int main(){
             case 'M':
                 imprimir_menu();
                 break;
+            case 'o':
+            case 'O':
+                shell_sort(NOME_ARQUIVO);
+                break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
                 break;
@@ -107,9 +106,9 @@ void edicao (string nome_arq){
     dadosPrato novo_prato;
     cout << "Insira os dados do novo prato:" << endl;
     cout << "Nome do prato: ";
-    cin.getline(novo_prato.nome, TAM_PRATO);
+    cin.getline(novo_prato.nome, sizeof(char[30]));
     cout << "Nome do chefe: ";
-    cin.getline(novo_prato.chefe, TAM_CHEFE);
+    cin.getline(novo_prato.chefe, sizeof(char[20]));
     cout << "Avaliacao: ";
     cin >> novo_prato.avaliacao;
     cout << "Preco: ";
@@ -228,12 +227,12 @@ void remocao(string nome_arq){
     int linhas, i_itensApagados;
     i_itensApagados = divisao_apagados(nome_arq, linhas);
 
-	cout << "Deseja remover algum dos pratos fornecidos nos dados?" << endl;
-    cout << "Sim / Nao (1 / 2): ";
     string resposta;
     bool correto = false;
     
     while(!correto){
+        cout << "Deseja remover algum dos pratos fornecidos nos dados?" << endl;
+        cout << "Sim / Nao (1 / 2): ";
         cin>> resposta;
         if(resposta == "2"){
             cout << endl;
@@ -245,7 +244,6 @@ void remocao(string nome_arq){
             cin >> removerID;
             int pos = removerID-1;
             dadosPrato dados;
-            cout << i_itensApagados << "FLAAAAGQ!!\n";
             fstream arquivo (nome_arq, ios::in | ios::out | ios::binary | ios::ate);
             if (pos > i_itensApagados){
                 cout << "! Identificador INVALIDO !\n";
@@ -427,18 +425,6 @@ void shell_sort(string nome_arquivo){
     cout << "\n*** ORDENACAO CONCLUIDA ***\n\n";
 }
 
-dadosPrato *expandir_vetor(dadosPrato *v, int &tam, int exp){
-    dadosPrato *newV = new dadosPrato[tam + exp];
-
-    copy(v, v + tam, newV);
-    tam += exp;
-    delete [] v;
-
-    v = newV;
-
-    return v;
-}
-
 dadosPrato *ler_dados(string nome_arq, int &tam){
     // Descobre o tamanho do arquivo e a quantidade de linhas
     ifstream entrada(nome_arq, ios::binary | ios::ate);
@@ -530,7 +516,7 @@ void organizar_apagados(string nome_arq, int indice){
         indice -= 1; // Subtraindo para que o índice em tela corresponda ao do vetor
         swap(v[indice], v[i_itensApagados]);
     }
-    
+
     ofstream saida(nome_arq, ios::binary);
     saida.write((char *) v, sizeof(dadosPrato[tam]));
     saida.close();
@@ -545,6 +531,7 @@ void imprimir_menu(){
             "3 - Apagar um item\n"
             "4 - Editar um item\n"
             "5 - Exibir valores\n"
+            "O - Ordenar valores\n"
             "M - Exibir comandos\n"
             "E - Sair\n";
 }
