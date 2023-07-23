@@ -452,7 +452,7 @@ void imprimir_dados(string nome_arq){
     ifstream entrada(nome_arq, ios::binary | ios::ate);
     entrada.seekg(0);
 
-    cout << "Escolha uma faixa de impressao (Ex.: 9 17): ";
+    cout << "Escolha uma faixa de impressao (Ex.: 9 17)\n(0 0 - imprime todos os itens): ";
     int limSup, limInf;
     cin >> limInf >> limSup;
 
