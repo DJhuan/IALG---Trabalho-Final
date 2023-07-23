@@ -310,7 +310,7 @@ void imprimir_dados(string nome_arq){
     }
     entrada.seekg(0);
 
-    cout << "Escolha uma faixa de impressão (Ex.: 9 17): ";
+    cout << "Escolha uma faixa de impressao (Ex.: 9 17): ";
     int limSup, limInf;
     cin >> limInf >> limSup;
 
