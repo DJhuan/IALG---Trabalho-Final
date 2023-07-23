@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iomanip>
 #include <cstring>
+#include <cmath>
+
 
 #define TAM_PRATO 30
 #define TAM_CHEFE 20
@@ -32,6 +34,8 @@ bool comparador(dadosPrato itemA, dadosPrato itemB, string filtroSelo, int tipo)
 void insercao(string nome_arq);
 void remocao(string nome_arq);
 int divisao_apagados(string nome_arq, int &linhas);
+void edicao (string nome_arq);
+void busca (string nome_arq);
 
 int main(){
 
@@ -53,7 +57,7 @@ int main(){
         string decisao = "0";
         switch (opcao[0]){
             case '1':
-                //busca(pratos, qntPratos);
+                busca(NOME_ARQUIVO);
                 break;
             case '2':
                 insercao(NOME_ARQUIVO);
@@ -62,7 +66,7 @@ int main(){
                 remocao(NOME_ARQUIVO);
                 break;
             case '4':
-                //edicao(pratos, qntPratos);
+                edicao(NOME_ARQUIVO);
                 break;
             case '5':
                 imprimir_dados(NOME_ARQUIVO);
@@ -75,9 +79,6 @@ int main(){
             case 'M':
                 imprimir_menu();
                 break;
-            case 'i':
-                organizar_apagados(NOME_ARQUIVO);
-                break;
             default:
                 cout << "Infelizmente nao existe esse comando! \n";
                 break;
@@ -88,9 +89,139 @@ int main(){
     cout << "************* Adeus *************\n";
     cout << "*********************************\n\n";
 
-    //bool status_armazenamento = armazenar_dados(pratos, qnt_pratos, arquivo);
-
     return 0;
+}
+
+void edicao (string nome_arq){
+    dadosPrato prato;
+    fstream arquivo (nome_arq, ios::in | ios::out | ios:: binary | ios::ate);
+    long int tamanho_bytes = arquivo.tellg();
+    int num_regs = int (tamanho_bytes/sizeof(dadosPrato));
+
+    int cont=0;
+    char nome_alterado[20];
+    cout << "Insira o nome do prato que deseja alterar: ";
+    cin.ignore();
+    cin.getline(nome_alterado, sizeof(nome_alterado));
+
+    dadosPrato novo_prato;
+    cout << "Insira os dados do novo prato:" << endl;
+    cout << "Nome do prato: ";
+    cin.getline(novo_prato.nome, TAM_PRATO);
+    cout << "Nome do chefe: ";
+    cin.getline(novo_prato.chefe, TAM_CHEFE);
+    cout << "Avaliacao: ";
+    cin >> novo_prato.avaliacao;
+    cout << "Preco: ";
+    cin.ignore();
+    cin >> novo_prato.preco;
+    cout << "Escolha o selo: \n[1] - Vegano\n[2] - Vegetariano\n[3] - Comum\nEscolha: ";
+    int escolha = -1;
+    while (escolha < 1 or escolha > 3){
+        cin >> escolha;
+        if (escolha < 1 or escolha > 3)
+            cout << "Entrada invalida!\nEscolha novamente: ";
+    }
+    if (escolha == 1)
+        strncpy(novo_prato.selo, "Vegano", sizeof(char[12]));
+    else if (escolha == 2)
+        strncpy(novo_prato.selo, "Vegetariano", sizeof(char[12]));
+    else
+        strncpy(novo_prato.selo, "Comum", sizeof(char[12]));
+    novo_prato.apagado = 0;
+
+    bool nao_achou=1;
+
+    while ((cont<num_regs) and (nao_achou)){
+        arquivo.seekp(cont*sizeof(dadosPrato));
+        arquivo.read((char*) &prato, sizeof(dadosPrato));
+        if(strcmp(prato.nome, nome_alterado)==0){
+            arquivo.seekp(cont*sizeof(dadosPrato));
+            arquivo.write((char*) &novo_prato, sizeof(dadosPrato));
+            nao_achou=0;
+            cout << "Alteracao concluida com sucesso!" << endl;
+        }
+        cont++;
+    }
+    if (nao_achou){
+        cout << "A alteracao nao foi concluida pois nao foi encontrado nenhum prato com esse nome." << endl;
+    }
+}
+
+void busca (string nome_arq){ 
+
+    bool opcaoValida = false;
+    int campo;
+    //Compara a info buscada com as informaçoes do vetor
+    do {
+        cout << "Em qual campo deseja buscar? " << endl;
+        cout << "1. Nome do prato." << endl;
+        cout << "2. Preco. " << endl;
+        cout << "Digite o numero referente ao campo: ";
+        cin >> campo;
+    
+        if (campo == 1 or campo == 2) {
+            opcaoValida = true;
+        } else {
+            cout << "Opcao invalida. Por favor, escolha entre 1 e 2!" << endl;
+        }
+    } while (!opcaoValida);
+
+    char pratoBuscado[30];
+    float precoBuscado;
+    
+    fstream arquivo (nome_arq, ios::in|ios::ate|ios::binary);
+	long int tamanho = arquivo.tellg();
+	int regs = int (tamanho/sizeof(dadosPrato));
+	
+	int posicao=-1;
+	int cont=0;
+	dadosPrato dados;
+	
+    switch (campo){
+		
+        case (1): {
+            cout << "Digite o nome do prato que esta buscando: ";
+            cin.ignore();
+            cin.getline(pratoBuscado, sizeof(pratoBuscado));
+            while ((cont < regs) and (posicao ==-1)){
+				 arquivo.seekg(cont*sizeof(dadosPrato));
+				 arquivo.read((char*) &dados, sizeof(dadosPrato));
+					if (strcmp(pratoBuscado, dados.nome)==0) {
+						posicao = cont;
+					}
+					 cont++;
+			}
+            break;
+        }
+        
+        case (2): {
+            cout << "Digite o preco que esta buscando: ";
+            cin >> precoBuscado;
+                while ((cont < regs) and (posicao ==-1)){
+				 arquivo.seekg(cont*sizeof(dadosPrato));
+				 arquivo.read((char*) &dados, sizeof(dadosPrato));
+					if (abs(precoBuscado - dados.preco) < 0.01) {
+						posicao = cont;
+					}
+					 cont++;
+			}
+            break;
+		}
+   
+        default:
+            cout << "Opcao invalida." << endl;
+            break;
+            
+    }
+    
+	if (posicao !=-1){
+		cout << posicao+1 << " " << dados.nome << " " << dados.chefe << " " << dados.avaliacao << " " << dados.avaliacao << " " << dados.preco << " " << dados.selo << endl;
+	}
+	else {
+		cout << "Nao foi encontrado nenhum prato com essa informacao." << endl;
+	}
+	arquivo.close();
 }
 
 void remocao(string nome_arq){
